@@ -1,0 +1,21 @@
+<html>
+<head>
+    <title>{{.Title}}</title>
+</head>
+<body>
+    <h1>{{.Title}}</h1>
+    <p>Час перевірки: {{.Timestamp}}</p>
+    <h2>Об'єкт: {{.ObjectType}}</h2>
+
+    {{if .Indicators}}
+        <h3>Показники:</h3>
+        <ul>
+            {{range .Indicators}}
+                <li>{{.Name}}: {{.Value}} {{.Unit}}</li>
+            {{end}}
+        </ul>
+    {{else}}
+        <p>Немає даних для відображення.</p>
+    {{end}}
+</body>
+</html>
