@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Система аварійного електропостачання</title></head>
+<body>
+  <h2>Введення даних обладнання</h2>
+  <form method="POST" action="/">
+    Назва: <input type="text" name="name" required><br>
+    Дата: <input type="date" name="date" required><br>
+    Напруга: <input type="number" step="0.1" name="voltage" required><br>
+    Статус:
+    <select name="status">
+      <option value="норма">Норма</option>
+      <option value="аварія">Аварія</option>
+    </select><br>
+    <input type="submit" value="Надіслати">
+  </form>
+</body>
+</html>
