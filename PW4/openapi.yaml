@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: Emergency Power System API
+  version: 1.0.0
+  description: REST API для керування системами аварійного електропостачання
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /systems:
+    get:
+      summary: Отримати всі системи
+      responses:
+        '200':
+          description: Список систем
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerSystem'
+  /systems/create:
+    post:
+      summary: Додати нову систему
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerSystem'
+      responses:
+        '201':
+          description: Систему створено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerSystem'
+        '400':
+          description: Некоректні дані
+  /systems/update:
+    put:
+      summary: Оновити систему за ID
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerSystem'
+      responses:
+        '200':
+          description: Систему оновлено
+        '404':
+          description: Систему не знайдено
+  /systems/delete:
+    delete:
+      summary: Видалити систему за ID
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Систему видалено
+        '404':
+          description: Систему не знайдено
+
+components:
+  schemas:
+    PowerSystem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Система резервного живлення №1"
+        source:
+          type: string
+          enum:
+            - зелена електрика
+            - теплова (ТЕЦ)
+          example: зелена електрика
+        state:
+          type: string
+          enum:
+            - стабільний
+            - критичний
+            - аварійний
+          example: стабільний
