@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Системи аварійного електропостачання</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; cursor: pointer; }
+    th { background: #eee; }
+    form { margin-top: 20px; }
+    input, select { margin-right: 10px; }
+    button { margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Системи аварійного електропостачання</h1>
+
+  <!-- Форма для створення системи -->
+  <form id="createForm" onsubmit="return false;">
+    <input type="text" id="name" placeholder="Назва" required>
+    <select id="source">
+      <option value="Зелена електрика">Зелена електрика</option>
+      <option value="Теплова (ТЕЦ)">Теплова (ТЕЦ)</option>
+    </select>
+    <select id="state">
+      <option value="Стабільний">Стабільний</option>
+      <option value="Критичний">Критичний</option>
+      <option value="Аварійний">Аварійний</option>
+    </select>
+    <button id="addBtn">Додати систему</button>
+  </form>
+
+  <!-- Таблиця -->
+  <table id="systemsTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable('id')">ID</th>
+        <th onclick="sortTable('name')">Назва</th>
+        <th onclick="sortTable('source')">Джерело</th>
+        <th onclick="sortTable('state')">Стан</th>
+        <th>Дії</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let systemsData = [];
+    let currentSort = { column: null, asc: true };
+
+    async function loadSystems() {
+      const res = await fetch('/systems');
+      systemsData = await res.json();
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector('#systemsTable tbody');
+      tbody.innerHTML = '';
+      systemsData.forEach(sys => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${sys.id}</td>
+          <td><input value="${sys.name}" id="name-${sys.id}"></td>
+          <td><input value="${sys.source}" id="source-${sys.id}"></td>
+          <td><input value="${sys.state}" id="state-${sys.id}"></td>
+          <td>
+            <button onclick="updateSystem(${sys.id})">Оновити</button>
+            <button onclick="deleteSystem(${sys.id})">Видалити</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.asc = !currentSort.asc;
+      } else {
+        currentSort.column = column;
+        currentSort.asc = true;
+      }
+      systemsData.sort((a, b) => {
+        if (a[column] < b[column]) return currentSort.asc ? -1 : 1;
+        if (a[column] > b[column]) return currentSort.asc ? 1 : -1;
+        return 0;
+      });
+      renderTable();
+    }
+
+    async function deleteSystem(id) {
+      await fetch('/systems/delete?id=' + id, { method: 'DELETE' });
+      loadSystems();
+    }
+
+    async function updateSystem(id) {
+      const sys = {
+        name: document.getElementById('name-' + id).value,
+        source: document.getElementById('source-' + id).value,
+        state: document.getElementById('state-' + id).value
+      };
+      const res = await fetch('/systems/update?id=' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sys)
+      });
+      if (res.ok) {
+        loadSystems();
+      } else {
+        const err = await res.json();
+        alert("Помилка: " + err.error);
+      }
+    }
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+      const sys = {
+        name: document.getElementById('name').value,
+        source: document.getElementById('source').value,
+        state: document.getElementById('state').value
+      };
+      const res = await fetch('/systems/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sys)
+      });
+      if (res.ok) {
+        document.getElementById('createForm').reset();
+        loadSystems();
+      } else {
+        const err = await res.json();
+        alert("Помилка: " + err.error);
+      }
+    });
+
+    loadSystems();
+  </script>
+</body>
+</html>
