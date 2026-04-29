@@ -1,0 +1,175 @@
+openapi: 3.0.0
+info:
+  title: Система аварійного електропостачання API
+  version: 1.0.0
+  description: >
+    API для управління системами аварійного електропостачання та користувачами.
+    Реалізовано CRUD для систем, а також реєстрацію, авторизацію і профіль користувача.
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /systems:
+    get:
+      summary: Отримати всі системи
+      responses:
+        '200':
+          description: Список систем
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerSystem'
+
+  /systems/create:
+    post:
+      summary: Створити нову систему
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerSystem'
+      responses:
+        '201':
+          description: Система створена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerSystem'
+        '400':
+          description: Некоректний JSON
+        '500':
+          description: Помилка бази даних
+
+  /systems/update:
+    put:
+      summary: Оновити систему
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerSystem'
+      responses:
+        '200':
+          description: Система оновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerSystem'
+        '400':
+          description: Некоректний ID або JSON
+        '500':
+          description: Помилка бази даних
+
+  /systems/delete:
+    delete:
+      summary: Видалити систему
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Система видалена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Некоректний ID
+        '500':
+          description: Помилка бази даних
+
+  /register:
+    post:
+      summary: Реєстрація користувача
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Користувач зареєстрований
+        '400':
+          description: Некоректний JSON
+        '500':
+          description: Помилка бази даних
+
+  /login:
+    post:
+      summary: Авторизація користувача
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Успішний логін
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Невірні дані
+        '400':
+          description: Некоректний JSON
+
+  /profile:
+    get:
+      summary: Профіль користувача
+      responses:
+        '200':
+          description: Дані профілю
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+        '401':
+          description: Не авторизований
+
+components:
+  schemas:
+    PowerSystem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        source:
+          type: string
+        state:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
